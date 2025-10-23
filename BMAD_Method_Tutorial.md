@@ -1,8 +1,10 @@
 # BMAD-METHOD 完全使用指南 - 从零到精通
 
 ## 📌 文档信息
-- **版本**：v1.0
+- **版本**：v1.1
 - **创建日期**：2025-10-23
+- **最后更新**：2025-10-23
+- **更新内容**：完成英文内容中文化翻译
 - **适用对象**：AI 产品开发者、创业者、完全零基础的 BMAD 用户
 - **预计学习时间**：2-3 小时（含实战练习）
 
@@ -239,6 +241,74 @@ BMAD-METHOD 支持两种 AI 平台：
 | **CustomGPT** (OpenAI) | 功能强大 | 需要 ChatGPT Plus ($20/月) | ⭐⭐⭐⭐ |
 
 **推荐新手使用 Gemini Gems**（本教程以 Gemini 为例）
+
+---
+
+### ⚠️ 重要说明：为什么 BMAD 规划阶段不支持 Claude Code？
+
+**技术限制**：
+- BMAD-METHOD 的**规划阶段**（Analyst、PM、Architect、Scrum Master）需要在 **Web UI** 中运行
+- 原因：需要上传团队包文件（.txt），并通过系统指令配置 AI 代理角色
+- Claude Code（VSCode/Cursor 插件）目前不支持这种配置方式
+
+**BMAD 的两阶段架构**：
+```
+阶段 1：规划阶段（需要 Web UI）
+├─ 平台：Gemini Gems / CustomGPT  ✅
+├─ 不支持：Claude Code / Claude.ai  ❌
+└─ 产出：PRD + 架构 + 开发故事文件
+
+阶段 2：开发阶段（推荐 Claude Code）
+├─ 平台：Claude Code（VSCode/Cursor）✅
+├─ 优势：代码实现、测试、调试
+└─ 工作方式：读取 .bmad/stories/ 中的故事文件
+```
+
+### 💡 推荐工作流方案
+
+**最佳实践**（适合 Claude 用户）：
+
+```
+第 1 步：规划阶段
+使用 Gemini Gems（免费）进行规划
+  ↓
+*analyst  → 需求分析
+*pm       → PRD 生成
+*architect → 架构设计
+*scrum    → 生成开发故事文件（.bmad/stories/）
+  ↓
+第 2 步：开发阶段
+切换到 Claude Code（Sonnet 4.5）
+  ↓
+读取 .bmad/stories/story-001.md
+  ↓
+Claude Code 实现代码（带完整上下文）
+```
+
+**为什么这样组合最优？**
+1. **规划阶段**：Gemini 免费且强大，完全满足规划需求
+2. **开发阶段**：Claude Sonnet 4.5 代码能力更强，成本效益高
+3. **知识持久化**：通过 .bmad/stories/ 文件传递上下文
+4. **成本优化**：规划免费，开发使用高性价比模型
+
+### 🔄 替代方案
+
+**方案 1：纯 Gemini 流程**（完全免费）
+- 规划：Gemini Gems
+- 开发：Gemini API + 本地 IDE
+- 适合：预算有限的独立开发者
+
+**方案 2：纯 Claude 流程**（无 BMAD 规划）
+- 规划：直接在 Claude Code 中手动规划
+- 开发：Claude Code
+- 缺点：缺少 BMAD 的结构化规划和上下文持久化
+
+**方案 3：混合流程**（推荐 ⭐）
+- 规划：Gemini Gems（BMAD 规划）
+- 开发：Claude Code（读取 BMAD 故事）
+- 优势：结合两者优点，成本最优
+
+---
 
 ### 2.2 下载团队包
 
@@ -920,16 +990,16 @@ Dev 代理会：
 
 **Analyst 响应**：
 ```
-🔍 Analyst Mode Activated
+🔍 Analyst 模式已激活
 
-I'm your requirements analyst. I'll help you understand:
-- The problem you're solving
-- Your target users
-- Market opportunities
-- Technical feasibility
+我是你的需求分析师。我将帮助你理解：
+- 你要解决的问题
+- 你的目标用户
+- 市场机会
+- 技术可行性
 
-Please describe your project idea in as much detail as possible.
-What problem are you trying to solve?
+请尽可能详细地描述你的项目想法。
+你试图解决什么问题？
 ```
 
 #### **步骤 2：描述你的想法**
@@ -964,150 +1034,150 @@ What problem are you trying to solve?
 **Analyst 响应**（这是一个长回复，我只展示关键部分）：
 
 ```
-📋 PROJECT BRIEF - AI Fitness Coach
+📋 项目简介 - AI 健身教练
 
-## 1. PROBLEM ANALYSIS
+## 1. 问题分析
 
-### Core Problem
-Traditional fitness coaching faces three barriers:
-1. **Cost Barrier**: Personal trainers cost $50-150/hour
-2. **Access Barrier**: Limited availability, gym required
-3. **Personalization Gap**: Generic workout apps lack individual adaptation
+### 核心问题
+传统健身教练面临三大障碍：
+1. **成本障碍**：私人教练费用 $50-150/小时
+2. **访问障碍**：可用性有限，需要去健身房
+3. **个性化差距**：通用健身 App 缺乏个性化调整
 
-### Your Solution
-AI-powered personal fitness coach providing:
-- Personalized workout planning
-- Real-time form correction
-- Adaptive training progression
-- Fraction of the cost (<$10/month vs $400/month for PT)
+### 你的解决方案
+AI 驱动的个人健身教练提供：
+- 个性化训练计划
+- 实时动作纠正
+- 自适应训练进度
+- 成本低廉（<$10/月 vs 私教 $400/月）
 
-## 2. TARGET USER DEEP DIVE
+## 2. 目标用户深度分析
 
-### Primary Persona: "Fitness Newbie Noah"
-- Age: 25
-- Occupation: Software developer
-- Pain Points:
-  - Intimidated by gyms
-  - Tried YouTube workouts, but inconsistent
-  - Wants guidance but can't afford PT
-- Goals: Lose 10kg, build basic strength
-- Budget: <$15/month
+### 主要用户画像："健身新手 Noah"
+- 年龄：25 岁
+- 职业：软件开发工程师
+- 痛点：
+  - 对健身房感到害怕
+  - 尝试过 YouTube 健身视频，但不够持续
+  - 想要指导但负担不起私教
+- 目标：减重 10 公斤，建立基础力量
+- 预算：<$15/月
 
-### Secondary Persona: "Busy Parent Sarah"
-- Age: 32
-- Limited time (30 min/day max)
-- Home workout preferred
-- Previous injury concerns
+### 次要用户画像："忙碌家长 Sarah"
+- 年龄：32 岁
+- 时间有限（每天最多 30 分钟）
+- 偏好在家锻炼
+- 有旧伤顾虑
 
-## 3. TECHNICAL FEASIBILITY ANALYSIS
+## 3. 技术可行性分析
 
-### Movement Recognition
-✅ **Feasible**:
-- Use MediaPipe / TensorFlow.js for pose estimation
-- 30+ key body points detection in real-time
-- Accuracy: 85-95% for common exercises
+### 动作识别
+✅ **可行**：
+- 使用 MediaPipe / TensorFlow.js 进行姿态估计
+- 实时检测 30+ 个关键身体点
+- 常见动作准确率：85-95%
 
-⚠️ **Challenges**:
-- Requires good camera angle
-- Lighting conditions critical
-- Phone/computer camera only (no special hardware)
+⚠️ **挑战**：
+- 需要良好的摄像头角度
+- 光照条件很关键
+- 仅支持手机/电脑摄像头（无需特殊硬件）
 
-### AI Coaching Logic
-✅ **Feasible**:
-- GPT-4 for workout planning and adaptation
-- RAG for exercise database and form guidelines
-- Rule-based system for form checking (angles, alignment)
+### AI 教练逻辑
+✅ **可行**：
+- GPT-4 用于训练计划和调整
+- RAG 用于运动数据库和动作指南
+- 基于规则的系统进行动作检查（角度、对齐）
 
-### Personalization
-✅ **Feasible**:
-- Input: Age, weight, fitness level, goals, equipment, injuries
-- Output: Progressive workout plan
-- Adaptation based on user feedback and performance data
+### 个性化
+✅ **可行**：
+- 输入：年龄、体重、健身水平、目标、设备、伤病史
+- 输出：渐进式训练计划
+- 基于用户反馈和表现数据进行适应
 
-## 4. COMPETITIVE LANDSCAPE
+## 4. 竞争格局
 
-| Competitor | Strength | Weakness | Our Advantage |
-|------------|----------|----------|---------------|
-| Nike Training Club | Brand, free content | Generic plans | AI personalization |
-| Freeletics | AI-driven | Expensive ($60/year) | Better form checking |
-| Future Fitness | Real trainers | Very expensive ($150/mo) | AI at 10% cost |
-| FitBod | Adaptive workouts | No form checking | Real-time correction |
+| 竞品 | 优势 | 劣势 | 我们的优势 |
+|------|------|------|-----------|
+| Nike Training Club | 品牌、免费内容 | 通用计划 | AI 个性化 |
+| Freeletics | AI 驱动 | 价格贵（$60/年） | 更好的动作检查 |
+| Future Fitness | 真人教练 | 非常贵（$150/月） | AI 成本仅 10% |
+| FitBod | 自适应训练 | 无动作检查 | 实时纠正 |
 
-**Market Gap**: No affordable AI coach with real-time form correction
+**市场空白**：没有价格实惠且具备实时动作纠正的 AI 教练
 
-## 5. MVP SCOPE RECOMMENDATION
+## 5. MVP 范围建议
 
-### MUST HAVE (MVP Phase 1 - 3 months)
-1. ✅ User onboarding (goals, fitness level, equipment)
-2. ✅ AI-generated personalized workout plan (text-based)
-3. ✅ Exercise video library (20 common exercises)
-4. ✅ Basic form checking (5-10 key exercises)
-5. ✅ Workout logging and progress tracking
+### 必须有（MVP 第 1 阶段 - 3 个月）
+1. ✅ 用户引导（目标、健身水平、设备）
+2. ✅ AI 生成的个性化训练计划（文本）
+3. ✅ 运动视频库（20 个常见动作）
+4. ✅ 基础动作检查（5-10 个关键动作）
+5. ✅ 训练记录和进度追踪
 
-### SHOULD HAVE (Phase 2 - Month 4-6)
-6. Real-time voice coaching during workout
-7. Expanded exercise library (50+ exercises)
-8. Nutrition guidance integration
-9. Rest day recommendations
+### 应该有（第 2 阶段 - 第 4-6 个月）
+6. 训练过程中的实时语音指导
+7. 扩展的运动库（50+ 个动作）
+8. 营养指导集成
+9. 休息日建议
 
-### COULD HAVE (Phase 3 - Month 7+)
-10. AR overlays for form guidance
-11. Social features (workout buddies)
-12. Wearable device integration
+### 可以有（第 3 阶段 - 第 7 个月+）
+10. AR 叠加动作指导
+11. 社交功能（训练伙伴）
+12. 可穿戴设备集成
 
-### WON'T HAVE (Out of scope)
-- Meal delivery service
-- Equipment sales
-- Group classes
+### 不会有（超出范围）
+- 送餐服务
+- 设备销售
+- 团体课程
 
-## 6. KEY ASSUMPTIONS TO VALIDATE
+## 6. 需要验证的关键假设
 
-1. **Users trust AI form correction** - Test with beta users
-2. **Camera quality sufficient** - Test with various devices
-3. **Users complete 3+ workouts/week** - Key for retention
-4. **Willing to pay $10/month** - Price sensitivity testing needed
+1. **用户信任 AI 动作纠正** - 通过 beta 用户测试
+2. **摄像头质量足够** - 通过各种设备测试
+3. **用户每周完成 3+ 次训练** - 留存的关键
+4. **愿意支付 $10/月** - 需要价格敏感度测试
 
-## 7. SUCCESS CRITERIA
+## 7. 成功标准
 
-### North Star Metric
-**Weekly Active Users (WAU)** - measures actual usage, not just signups
+### 北极星指标
+**每周活跃用户（WAU）** - 衡量实际使用情况，而非仅注册量
 
-### Supporting Metrics
-- User Retention: Day 7 > 40%, Day 30 > 25%
-- Workout Completion Rate > 70%
-- Form Correction Accuracy > 85% (validated by PTs)
-- User Satisfaction (NPS) > 50
+### 支撑指标
+- 用户留存：第 7 天 > 40%，第 30 天 > 25%
+- 训练完成率 > 70%
+- 动作纠正准确率 > 85%（由私教验证）
+- 用户满意度（NPS）> 50
 
-## 8. TECHNICAL STACK RECOMMENDATION (Preliminary)
+## 8. 技术栈建议（初步）
 
-**AI/ML**:
-- GPT-4 (workout planning)
-- MediaPipe (pose estimation)
-- LangChain (RAG for exercise knowledge)
+**AI/ML**：
+- GPT-4（训练计划）
+- MediaPipe（姿态估计）
+- LangChain（RAG 运动知识）
 
-**Platform**:
-- Web app first (easier MVP)
-- Mobile app later (better camera experience)
+**平台**：
+- 首先开发 Web 应用（MVP 更容易）
+- 之后开发移动应用（更好的摄像头体验）
 
-## 9. RISKS & MITIGATION
+## 9. 风险与缓解
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Injury liability | High | Disclaimer, form accuracy focus, PT review |
-| Low adoption | High | Free trial, demo videos |
-| Technical complexity | Medium | Start with simple exercises |
-| Competition | Medium | Focus on personalization + cost |
+| 风险 | 影响 | 缓解措施 |
+|------|------|----------|
+| 运动伤害责任 | 高 | 免责声明、专注动作准确性、私教审核 |
+| 采用率低 | 高 | 免费试用、演示视频 |
+| 技术复杂性 | 中 | 从简单动作开始 |
+| 竞争 | 中 | 专注个性化 + 成本优势 |
 
-## 10. NEXT STEPS
+## 10. 后续步骤
 
-✅ This brief is complete.
+✅ 本简介已完成。
 
-**Recommendation**:
-1. Validate core assumption with 10-15 target users (interviews)
-2. Build clickable prototype (Figma) to test concept
-3. Move to PM agent to define detailed PRD
+**建议**：
+1. 通过 10-15 名目标用户验证核心假设（访谈）
+2. 构建可点击原型（Figma）测试概念
+3. 移交给 PM 代理定义详细 PRD
 
-**Ready to proceed?** Type `*pm` to start PRD creation, or ask me questions about this brief.
+**准备好继续了吗？** 输入 `*pm` 开始创建 PRD，或向我提问关于本简介的问题。
 ```
 
 #### **步骤 4：与 Analyst 互动**
@@ -1147,9 +1217,9 @@ Should I update the brief with this refinement?
 Analyst：
 Perfect! Your project brief is saved.
 
-Next: Type *pm to work with the Product Manager on creating a detailed PRD.
+下一步：输入 *pm 与产品经理一起创建详细的 PRD。
 
-The PM will transform this analysis into specific features, user stories, and success metrics.
+PM 将把这个分析转化为具体的功能、用户故事和成功指标。
 ```
 
 ✅ **Analyst 阶段完成！**
@@ -1168,28 +1238,28 @@ The PM will transform this analysis into specific features, user stories, and su
 
 **PM 响应**：
 ```
-📋 Product Manager Mode Activated
+📋 产品经理模式已激活
 
-I've reviewed the Analyst's brief for your AI Fitness Coach project.
+我已经审阅了分析师为你的 AI 健身教练项目准备的简介。
 
-I'll help you create a detailed Product Requirements Document (PRD) including:
-- Feature specifications
-- User stories
-- Success metrics
-- Technical requirements
-- Launch timeline
+我将帮助你创建详细的产品需求文档（PRD），包括：
+- 功能规格
+- 用户故事
+- 成功指标
+- 技术要求
+- 发布时间表
 
-Let's start by confirming the MVP scope. Based on the brief, I suggest focusing on:
+让我们先确认 MVP 范围。根据简介，我建议专注于：
 
-1. Personalized workout planning
-2. Exercise video library
-3. Basic form checking (5-10 exercises)
-4. Progress tracking
+1. 个性化训练计划
+2. 运动视频库
+3. 基础形态检查（5-10 个动作）
+4. 进度追踪
 
-Do you want to:
-A) Proceed with this scope
-B) Add/remove features
-C) Discuss specific features in detail
+你想要：
+A) 按此范围继续
+B) 增加/删除功能
+C) 详细讨论特定功能
 ```
 
 #### **步骤 2：确认 MVP 范围**
@@ -1198,45 +1268,45 @@ C) Discuss specific features in detail
 你：A，继续这个范围。但我想确认：基础形态检查具体指哪些？
 
 PM：
-Great question! Let me clarify "Basic Form Checking":
+很好的问题！让我澄清一下"基础形态检查"：
 
-**Phase 1 MVP - 5 Core Exercises with Form Check**:
+**第 1 阶段 MVP - 5 个核心动作的形态检查**：
 
-1. **Squat**
-   - Check: Knee alignment, back angle, depth
-   - Feedback: "Knees tracking over toes? Back straight?"
+1. **深蹲**
+   - 检查：膝盖对齐、背部角度、深度
+   - 反馈："膝盖在脚尖正上方吗？背部挺直吗？"
 
-2. **Push-up**
-   - Check: Elbow angle, body alignment, depth
-   - Feedback: "Keep core engaged, elbows at 45°"
+2. **俯卧撑**
+   - 检查：肘部角度、身体对齐、深度
+   - 反馈："保持核心收紧，肘部 45°"
 
-3. **Plank**
-   - Check: Hip alignment, shoulder position
-   - Feedback: "Lift hips slightly, avoid sagging"
+3. **平板支撑**
+   - 检查：臀部对齐、肩部位置
+   - 反馈："略微抬高臀部，避免下垂"
 
-4. **Lunge**
-   - Check: Knee angle, forward lean
-   - Feedback: "Front knee behind toes"
+4. **弓步蹲**
+   - 检查：膝盖角度、前倾程度
+   - 反馈："前膝盖不超过脚尖"
 
-5. **Glute Bridge**
-   - Check: Hip height, knee angle
-   - Feedback: "Squeeze glutes at top"
+5. **臀桥**
+   - 检查：臀部高度、膝盖角度
+   - 反馈："顶部挤压臀部"
 
-**Why these 5?**
-- Most common beginner exercises
-- Clear form rules (angle-based)
-- High injury risk if done wrong
-- Easier pose estimation (stable positions)
+**为什么选这 5 个？**
+- 最常见的初学者动作
+- 明确的形态规则（基于角度）
+- 做错了受伤风险高
+- 更容易的姿态估计（稳定姿势）
 
-**Detection Method**:
-- MediaPipe identifies 33 body landmarks
-- Calculate joint angles
-- Compare with ideal ranges
-- Real-time feedback overlay
+**检测方法**：
+- MediaPipe 识别 33 个身体标志点
+- 计算关节角度
+- 与理想范围比较
+- 实时反馈叠加
 
-**Accuracy Target**: 85%+ (validated with PT)
+**准确度目标**：85%+（由私教验证）
 
-Shall I proceed with the full PRD based on this?
+我可以基于此继续生成完整 PRD 吗？
 ```
 
 #### **步骤 3：生成完整 PRD**
@@ -1250,145 +1320,145 @@ PM：
 **PM 开始生成 PRD**（这是一个很长的文档，我展示关键部分）：
 
 ```markdown
-📄 PRODUCT REQUIREMENTS DOCUMENT
-# AI Fitness Coach - MVP v1.0
+📄 产品需求文档
+# AI 健身教练 - MVP v1.0
 
-**Product Name**: FitAI Coach
-**Version**: 1.0 MVP
-**Created**: 2025-10-23
-**Owner**: [Your Name]
-**Status**: Draft for Review
-
----
-
-## 1. EXECUTIVE SUMMARY
-
-### Vision
-Democratize personal fitness coaching through AI, making expert guidance accessible to everyone at 10% the cost of traditional trainers.
-
-### Mission (MVP)
-Deliver personalized workout plans with real-time form correction for 5 core bodyweight exercises, helping fitness newbies start their journey safely and effectively.
-
-### Target Launch
-Q2 2025 (3 months development)
+**产品名称**：FitAI Coach
+**版本**：1.0 MVP
+**创建日期**：2025-10-23
+**负责人**：[你的名字]
+**状态**：草稿待审核
 
 ---
 
-## 2. PRODUCT OVERVIEW
+## 1. 执行摘要
 
-### 2.1 Problem Statement
-- 80% of fitness newbies quit within 3 months
-- Personal trainers cost $100+/session (unaffordable for most)
-- Generic workout apps lack personalization and form guidance
-- **Consequence**: High injury rates, low adherence, wasted potential
+### 愿景
+通过 AI 民主化个人健身指导，让专业指导以传统教练 10% 的成本惠及所有人。
 
-### 2.2 Solution
-AI-powered personal fitness coach providing:
-- Personalized workout plans adapted to user goals and fitness level
-- Real-time form correction using computer vision
-- Progressive training that adapts to user performance
-- Cost: <$10/month (vs $400/month for human PT)
+### 使命（MVP）
+为 5 个核心自重动作提供个性化训练计划和实时形态纠正，帮助健身新手安全有效地开始健身之旅。
 
-### 2.3 Success Definition
-- **North Star Metric**: Weekly Active Workouts per User > 3
-- Day 7 Retention > 40%
-- Form Correction Accuracy > 85%
+### 目标发布时间
+2025 年 Q2（3 个月开发）
+
+---
+
+## 2. 产品概述
+
+### 2.1 问题陈述
+- 80% 的健身新手在 3 个月内放弃
+- 私人教练每次收费 $100+（大多数人无法负担）
+- 通用健身 App 缺乏个性化和形态指导
+- **后果**：高受伤率、低坚持度、浪费潜力
+
+### 2.2 解决方案
+AI 驱动的个人健身教练提供：
+- 根据用户目标和健身水平定制的个性化训练计划
+- 使用计算机视觉的实时形态纠正
+- 根据用户表现自适应的渐进式训练
+- 成本：<$10/月（vs 真人私教 $400/月）
+
+### 2.3 成功定义
+- **北极星指标**：每用户每周活跃训练次数 > 3
+- 第 7 天留存 > 40%
+- 形态纠正准确率 > 85%
 - NPS > 50
 
 ---
 
-## 3. USER PERSONAS
+## 3. 用户画像
 
-### Primary: "Newbie Noah" (60% of users)
-- Age: 22-28
-- Occupation: Knowledge worker
-- Fitness Level: Beginner (can do 5 push-ups)
-- Goal: Lose weight + build basic strength
-- Available Time: 30-45 min, 3-4x/week
-- Pain Points:
-  - Doesn't know where to start
-  - Afraid of doing exercises wrong
-  - Can't afford gym/trainer
-- Motivation: Health, confidence, appearance
+### 主要画像："新手 Noah"（60% 用户）
+- 年龄：22-28
+- 职业：知识工作者
+- 健身水平：初学者（可以做 5 个俯卧撑）
+- 目标：减重 + 建立基础力量
+- 可用时间：30-45 分钟，每周 3-4 次
+- 痛点：
+  - 不知道从哪开始
+  - 害怕动作做错
+  - 负担不起健身房/教练
+- 动机：健康、自信、外观
 
-### Secondary: "Busy Parent Sarah" (25% of users)
-- Age: 30-40
-- Limited time: 20-30 min/day max
-- Goal: Stay fit, energy for kids
-- Previous injuries: Back pain
-- Pain Point: Time-constrained, needs efficiency
+### 次要画像："忙碌家长 Sarah"（25% 用户）
+- 年龄：30-40
+- 时间有限：每天最多 20-30 分钟
+- 目标：保持健康，为孩子提供精力
+- 既往伤病：背痛
+- 痛点：时间紧迫，需要高效
 
-### Tertiary: "Comeback Chris" (15% of users)
-- Age: 35-45
-- Used to be fit, now out of shape
-- Goal: Regain previous fitness
-- Motivation: Health scare, milestone birthday
+### 第三画像："复出 Chris"（15% 用户）
+- 年龄：35-45
+- 曾经健康，现在走样
+- 目标：恢复之前的健康水平
+- 动机：健康警告、里程碑生日
 
 ---
 
-## 4. FEATURE SPECIFICATIONS (MoSCoW)
+## 4. 功能规格（MoSCoW）
 
-### 4.1 MUST HAVE (MVP Launch)
+### 4.1 必须有（MVP 发布）
 
-#### Feature 1: Smart Onboarding
-**Description**: Collect user data to personalize workout plans
+#### 功能 1：智能引导
+**描述**：收集用户数据以个性化训练计划
 
-**User Story**:
-_As a new user, I want to answer questions about my fitness level and goals, so that I receive a plan tailored to me._
+**用户故事**：
+_作为新用户，我想回答关于我的健身水平和目标的问题，以便收到为我量身定制的计划。_
 
-**Acceptance Criteria**:
-- [ ] 5-step onboarding flow (< 3 minutes)
-- [ ] Questions: Age, Weight, Height, Fitness Level (1-5), Goals (multi-select), Equipment (none/dumbbells/full), Injuries/Limitations, Available Days (3-7), Time per Workout (15/30/45/60 min)
-- [ ] Skippable with "Quick Start" option
-- [ ] Data saved to user profile
-- [ ] Can edit later in settings
+**验收标准**：
+- [ ] 5 步引导流程（< 3 分钟）
+- [ ] 问题：年龄、体重、身高、健身水平（1-5）、目标（多选）、设备（无/哑铃/全套）、伤病/限制、可用天数（3-7）、每次训练时间（15/30/45/60 分钟）
+- [ ] 可通过"快速开始"选项跳过
+- [ ] 数据保存到用户档案
+- [ ] 之后可在设置中编辑
 
-**Technical Specs**:
-- Frontend form validation
+**技术规格**：
+- 前端表单验证
 - POST /api/user/onboarding
-- Store in PostgreSQL user table
+- 存储在 PostgreSQL 用户表
 
-**Design Notes**:
-- Progress bar at top (Step 1/5)
-- One question per screen (mobile-friendly)
-- Visual fitness level selector (stick figures)
+**设计说明**：
+- 顶部进度条（第 1/5 步）
+- 每屏一个问题（移动友好）
+- 可视化健身水平选择器（简笔人物）
 
 ---
 
-#### Feature 2: AI Workout Plan Generator
-**Description**: Generate personalized 4-week progressive workout plan
+#### 功能 2：AI 训练计划生成器
+**描述**：生成个性化的 4 周渐进式训练计划
 
-**User Story**:
-_As a user who completed onboarding, I want to receive a personalized workout plan, so that I know what to do each day._
+**用户故事**：
+_作为完成引导的用户，我想收到个性化的训练计划，以便知道每天该做什么。_
 
-**Acceptance Criteria**:
-- [ ] Generate 4-week plan (28 days)
-- [ ] 3-5 workouts per week based on user input
-- [ ] Each workout: 20-45 min duration
-- [ ] Progressive difficulty (Week 1 easier than Week 4)
-- [ ] Exercise variety (rotate exercises)
-- [ ] Rest days strategically placed
-- [ ] Adapts to user feedback (too easy/hard)
+**验收标准**：
+- [ ] 生成 4 周计划（28 天）
+- [ ] 根据用户输入每周 3-5 次训练
+- [ ] 每次训练：20-45 分钟时长
+- [ ] 难度递增（第 1 周比第 4 周简单）
+- [ ] 动作多样性（轮换动作）
+- [ ] 战略性安排休息日
+- [ ] 根据用户反馈调整（太简单/太难）
 
-**Technical Specs**:
-- GPT-4 prompt with user data
-- Exercise database (PostgreSQL)
-- Caching: Cache generated plans (Redis, 24h TTL)
+**技术规格**：
+- 带用户数据的 GPT-4 提示
+- 运动数据库（PostgreSQL）
+- 缓存：缓存生成的计划（Redis，24 小时 TTL）
 - POST /api/workout-plan/generate
-- Response time: < 5s
+- 响应时间：< 5 秒
 
-**Example Workout Day**:
+**训练日示例**：
 ```json
 {
   "day": 1,
-  "title": "Full Body Foundation",
-  "duration": "30 min",
+  "title": "全身基础",
+  "duration": "30 分钟",
   "exercises": [
     {
-      "name": "Bodyweight Squat",
+      "name": "自重深蹲",
       "sets": 3,
       "reps": 10,
-      "rest": "60s",
+      "rest": "60秒",
       "form_check_enabled": true,
       "video_url": "/videos/squat.mp4",
       "instructions": "..."
@@ -1400,399 +1470,399 @@ _As a user who completed onboarding, I want to receive a personalized workout pl
 
 ---
 
-#### Feature 3: Exercise Video Library
-**Description**: High-quality video demonstrations for each exercise
+#### 功能 3：运动视频库
+**描述**：每个动作的高质量视频演示
 
-**User Story**:
-_As a user starting an exercise, I want to watch a demo video, so that I understand proper form._
+**用户故事**：
+_作为开始动作的用户，我想观看演示视频，以便理解正确的形态。_
 
-**Acceptance Criteria**:
-- [ ] 15-20 exercise videos
-- [ ] Each video: 20-40 seconds, looped
-- [ ] Multiple angles (front, side)
-- [ ] Overlay: Key form points (arrows, text)
-- [ ] Slow-motion option
-- [ ] Can pause/replay
-- [ ] Lightweight (< 5MB per video)
+**验收标准**：
+- [ ] 15-20 个运动视频
+- [ ] 每个视频：20-40 秒，循环播放
+- [ ] 多角度（正面、侧面）
+- [ ] 叠加：关键形态要点（箭头、文字）
+- [ ] 慢动作选项
+- [ ] 可暂停/重播
+- [ ] 轻量级（每个视频 < 5MB）
 
-**Content Requirements**:
-- Professional trainer demonstration
-- Good lighting, plain background
-- HD quality (1080p minimum)
-
----
-
-#### Feature 4: Real-Time Form Checking (5 Exercises)
-**Description**: Computer vision detects user performing exercise and gives form feedback
-
-**User Story**:
-_As a user doing squats, I want the app to tell me if my form is correct, so that I avoid injury and get results._
-
-**Acceptance Criteria**:
-- [ ] Works on 5 exercises: Squat, Push-up, Plank, Lunge, Glute Bridge
-- [ ] Camera permission requested
-- [ ] Real-time pose detection (< 100ms latency)
-- [ ] Overlay: Skeleton visualization
-- [ ] Feedback: Green checkmark (good form) or Red X + tip (poor form)
-- [ ] Audio feedback option (voice cues)
-- [ ] Works on mobile and desktop
-- [ ] Minimum accuracy: 85% (vs professional trainer assessment)
-
-**Technical Specs**:
-- Frontend: MediaPipe library (TensorFlow.js)
-- Detects 33 body landmarks
-- Calculate joint angles
-- Rule-based checking:
-  - Squat: knee angle 70-110°, back angle < 45°
-  - Push-up: elbow angle 70-90° at bottom
-  - Plank: hip-shoulder-ankle alignment ±10°
-- No server-side processing (runs client-side for privacy + speed)
-
-**Edge Cases**:
-- Poor lighting: Show "Improve lighting" message
-- Person not fully visible: Show "Step back" message
-- Multiple people: Show "Only one person in frame"
+**内容要求**：
+- 专业教练演示
+- 良好照明、纯色背景
+- 高清质量（最低 1080p）
 
 ---
 
-#### Feature 5: Workout Tracking & Progress
-**Description**: Log completed workouts and visualize progress
+#### 功能 4：实时形态检查（5 个动作）
+**描述**：计算机视觉检测用户执行动作并给出形态反馈
 
-**User Story**:
-_As a user who completes workouts, I want to see my progress, so that I stay motivated._
+**用户故事**：
+_作为做深蹲的用户，我想让应用告诉我形态是否正确，以便避免受伤并获得效果。_
 
-**Acceptance Criteria**:
-- [ ] One-tap "Complete Workout" button
-- [ ] Track: Date, duration, exercises completed, sets/reps
-- [ ] Dashboard shows:
-  - Current week streak
-  - Total workouts completed
-  - Progress graph (workouts/week)
-  - Next workout preview
-- [ ] Achievements/badges (5 workouts, 10 workouts, etc.)
-- [ ] Can mark workout as "Too Easy" or "Too Hard" → adapts next plan
+**验收标准**：
+- [ ] 适用于 5 个动作：深蹲、俯卧撑、平板支撑、弓步蹲、臀桥
+- [ ] 请求摄像头权限
+- [ ] 实时姿态检测（< 100 毫秒延迟）
+- [ ] 叠加：骨架可视化
+- [ ] 反馈：绿色勾号（形态好）或红色 X + 提示（形态差）
+- [ ] 音频反馈选项（语音提示）
+- [ ] 在移动和桌面上工作
+- [ ] 最低准确率：85%（与专业教练评估相比）
 
-**Technical Specs**:
+**技术规格**：
+- 前端：MediaPipe 库（TensorFlow.js）
+- 检测 33 个身体标志点
+- 计算关节角度
+- 基于规则的检查：
+  - 深蹲：膝盖角度 70-110°，背部角度 < 45°
+  - 俯卧撑：底部肘部角度 70-90°
+  - 平板支撑：臀部-肩部-脚踝对齐 ±10°
+- 无服务器端处理（客户端运行，保护隐私 + 速度）
+
+**边缘情况**：
+- 光线不佳：显示"改善光线"消息
+- 人不完全可见：显示"后退一步"消息
+- 多人：显示"画面中只能有一人"
+
+---
+
+#### 功能 5：训练追踪与进度
+**描述**：记录完成的训练并可视化进度
+
+**用户故事**：
+_作为完成训练的用户，我想看到我的进度，以便保持动力。_
+
+**验收标准**：
+- [ ] 一键"完成训练"按钮
+- [ ] 追踪：日期、时长、完成的动作、组数/次数
+- [ ] 仪表板显示：
+  - 当前周连续
+  - 完成的总训练次数
+  - 进度图表（训练次数/周）
+  - 下次训练预览
+- [ ] 成就/徽章（5 次训练、10 次训练等）
+- [ ] 可标记训练为"太简单"或"太难" → 调整下次计划
+
+**技术规格**：
 - POST /api/workout/complete
-- Chart: Chart.js
-- Data retention: 6 months
+- 图表：Chart.js
+- 数据保留：6 个月
 
 ---
 
-### 4.2 SHOULD HAVE (Post-MVP, Month 4-6)
+### 4.2 应该有（MVP 后，第 4-6 个月）
 
-#### Feature 6: Voice Coaching
-- Real-time audio cues during workout
-- "3 more reps", "Keep going", "Rest now"
-- Motivational phrases
+#### 功能 6：语音指导
+- 训练期间的实时音频提示
+- "还有 3 次"、"继续"、"休息"
+- 激励性短语
 
-#### Feature 7: Expanded Exercise Library
-- 50+ exercises
-- Equipment variations (dumbbells, bands)
+#### 功能 7：扩展的运动库
+- 50+ 个动作
+- 设备变化（哑铃、弹力带）
 
-#### Feature 8: Nutrition Guidance
-- Basic calorie calculator
-- Macro recommendations
-- Meal ideas (no meal plans)
+#### 功能 8：营养指导
+- 基础卡路里计算器
+- 宏量营养素建议
+- 餐食想法（非餐食计划）
 
-#### Feature 9: Rest Day Optimization
-- Active recovery suggestions
-- Mobility exercises
-- Sleep/hydration tracking
+#### 功能 9：休息日优化
+- 主动恢复建议
+- 灵活性练习
+- 睡眠/水分追踪
 
 ---
 
-### 4.3 COULD HAVE (Phase 3, Month 7+)
+### 4.3 可以有（第 3 阶段，第 7 个月+）
 
-#### Feature 10: AR Form Overlay
-- Augmented reality overlay showing ideal form
+#### 功能 10：AR 形态叠加
+- 增强现实叠加显示理想形态
 - Apple ARKit / Google ARCore
 
-#### Feature 11: Social Features
-- Workout buddies
-- Leaderboards
-- Share achievements
+#### 功能 11：社交功能
+- 训练伙伴
+- 排行榜
+- 分享成就
 
-#### Feature 12: Wearables Integration
-- Apple Watch / Fitbit sync
-- Heart rate monitoring
-
----
-
-### 4.4 WON'T HAVE (Explicitly Out of Scope)
-
-- ❌ Meal delivery service
-- ❌ Equipment sales
-- ❌ Live group classes
-- ❌ Direct messaging with trainers
-- ❌ Specialized training (e.g., marathon prep, bodybuilding)
+#### 功能 12：可穿戴设备集成
+- Apple Watch / Fitbit 同步
+- 心率监控
 
 ---
 
-## 5. USER FLOWS
+### 4.4 不会有（明确超出范围）
 
-### 5.1 First-Time User Flow
+- ❌ 送餐服务
+- ❌ 设备销售
+- ❌ 直播团体课程
+- ❌ 与教练直接消息
+- ❌ 专业训练（如马拉松准备、健美）
+
+---
+
+## 5. 用户流程
+
+### 5.1 首次用户流程
 ```
-1. Land on homepage
-2. Click "Start Free Trial" (no credit card)
-3. Onboarding (5 questions, 3 min)
-4. Generate Workout Plan (loading: 5s)
-5. View "Your Plan" dashboard
-6. Click "Start Today's Workout"
-7. Grant camera permission
-8. Follow workout (25 min)
-9. Complete → Celebration screen
-10. View progress dashboard
+1. 登陆主页
+2. 点击"开始免费试用"（无需信用卡）
+3. 引导（5 个问题，3 分钟）
+4. 生成训练计划（加载：5 秒）
+5. 查看"你的计划"仪表板
+6. 点击"开始今天的训练"
+7. 授予摄像头权限
+8. 进行训练（25 分钟）
+9. 完成 → 庆祝屏幕
+10. 查看进度仪表板
 ```
 
-### 5.2 Returning User Flow
+### 5.2 回访用户流程
 ```
-1. Open app (auto-login)
-2. See Dashboard: Next workout, streak, progress
-3. Click "Start Workout"
-4. Exercise by exercise flow
-5. Complete → Updated progress
+1. 打开应用（自动登录）
+2. 看到仪表板：下次训练、连续、进度
+3. 点击"开始训练"
+4. 逐个动作流程
+5. 完成 → 更新进度
 ```
 
 ---
 
-## 6. SUCCESS METRICS
+## 6. 成功指标
 
-### 6.1 North Star Metric
-**Weekly Active Workouts (WAW)**: # of workouts completed per active user per week
+### 6.1 北极星指标
+**每周活跃训练（WAW）**：每个活跃用户每周完成的训练次数
 
-**Target**: 3+ WAW
-**Rationale**: 3x/week is minimum for fitness results; correlates with retention
+**目标**：3+ WAW
+**理由**：每周 3 次是获得健身效果的最低要求；与留存率相关
 
-### 6.2 Key Performance Indicators (KPIs)
+### 6.2 关键绩效指标（KPI）
 
-**Acquisition**:
-- Signups/week: 100+ (Month 1), 500+ (Month 3)
-- Trial-to-paid conversion: > 25%
+**获取**：
+- 注册数/周：100+（第 1 个月），500+（第 3 个月）
+- 试用转付费转化率：> 25%
 
-**Activation**:
-- Complete onboarding: > 90%
-- Complete first workout: > 70%
+**激活**：
+- 完成引导：> 90%
+- 完成首次训练：> 70%
 
-**Retention**:
-- Day 7: > 40%
-- Day 30: > 25%
-- Month 3: > 15%
+**留存**：
+- 第 7 天：> 40%
+- 第 30 天：> 25%
+- 第 3 个月：> 15%
 
-**Engagement**:
-- WAW: 3+
-- Workout completion rate: > 70% (start → finish)
-- Form check usage: > 60% of exercises
+**参与度**：
+- WAW：3+
+- 训练完成率：> 70%（开始 → 结束）
+- 形态检查使用率：> 60% 的动作
 
-**Revenue**:
-- MRR (Monthly Recurring Revenue): $5,000 by Month 3
-- ARPU (Average Revenue Per User): $10/month
+**收入**：
+- MRR（月度经常性收入）：第 3 个月达到 $5,000
+- ARPU（每用户平均收入）：$10/月
 - LTV/CAC > 3
 
-**Quality**:
-- Form correction accuracy: > 85% (vs PT validation)
-- NPS (Net Promoter Score): > 50
-- App Store rating: > 4.5 stars
+**质量**：
+- 形态纠正准确率：> 85%（vs 私教验证）
+- NPS（净推荐值）：> 50
+- App Store 评分：> 4.5 星
 
-### 6.3 Analytics Events to Track
+### 6.3 需追踪的分析事件
 
-**User Events**:
-- User signed up
-- Onboarding completed
-- Workout plan generated
-- Workout started
-- Exercise completed
-- Workout completed
-- Form check used
-- Feedback given (too easy/hard)
-- Subscription purchased
+**用户事件**：
+- 用户注册
+- 引导完成
+- 训练计划生成
+- 训练开始
+- 动作完成
+- 训练完成
+- 形态检查使用
+- 反馈给出（太简单/太难）
+- 订阅购买
 
-**Technical Events**:
-- Form check accuracy (per exercise)
-- Camera error rate
-- Loading time (workout plan generation)
-- Crash reports
-
----
-
-## 7. TECHNICAL REQUIREMENTS
-
-### 7.1 Performance
-- **Page Load**: < 2s
-- **Workout Plan Generation**: < 5s
-- **Form Check Latency**: < 100ms
-- **Video Load**: < 3s (progressive loading)
-- **99.9% Uptime**
-
-### 7.2 Browser/Device Support
-- **Web**: Chrome, Safari, Firefox (latest 2 versions)
-- **Mobile Web**: iOS Safari, Chrome Android
-- **Screen Sizes**: 320px - 2560px width
-- **Future**: Native mobile apps (iOS/Android)
-
-### 7.3 Security
-- HTTPS only
-- JWT authentication
-- No storage of credit card info (use Stripe)
-- Camera access: Ask permission, explain usage
-- Data encryption at rest
-
-### 7.4 Privacy
-- GDPR compliant
-- No selling of user data
-- Camera stream: Never uploaded to server (client-side processing)
-- Users can delete account + all data
-
-### 7.5 Accessibility
-- WCAG 2.1 AA compliance
-- Screen reader support
-- Keyboard navigation
-- High contrast mode
+**技术事件**：
+- 形态检查准确率（每个动作）
+- 摄像头错误率
+- 加载时间（训练计划生成）
+- 崩溃报告
 
 ---
 
-## 8. DESIGN GUIDELINES
+## 7. 技术要求
 
-### 8.1 Design Principles
-1. **Motivating**: Celebrate every win, use positive language
-2. **Clear**: Simple instructions, no fitness jargon
-3. **Trustworthy**: Professional, science-backed guidance
-4. **Efficient**: Quick to start workout, minimal clicks
+### 7.1 性能
+- **页面加载**：< 2 秒
+- **训练计划生成**：< 5 秒
+- **形态检查延迟**：< 100 毫秒
+- **视频加载**：< 3 秒（渐进式加载）
+- **99.9% 正常运行时间**
 
-### 8.2 Visual Style
-- **Colors**:
-  - Primary: Energetic Orange (#FF6B35)
-  - Secondary: Deep Blue (#004E89)
-  - Success: Green (#06D6A0)
-  - Warning: Yellow (#F7B32B)
-- **Typography**: Poppins (headings), Inter (body)
-- **Imagery**: Real people, diverse, energetic, authentic
+### 7.2 浏览器/设备支持
+- **Web**：Chrome、Safari、Firefox（最新 2 个版本）
+- **移动 Web**：iOS Safari、Chrome Android
+- **屏幕尺寸**：320px - 2560px 宽度
+- **未来**：原生移动应用（iOS/Android）
 
-### 8.3 Key Screens
-1. Dashboard: Today's workout, streak counter, progress graph
-2. Workout In Progress: Large exercise name, rep counter, form check overlay
-3. Completion: Celebration animation, stats, next workout preview
+### 7.3 安全性
+- 仅 HTTPS
+- JWT 认证
+- 不存储信用卡信息（使用 Stripe）
+- 摄像头访问：请求权限，解释用途
+- 静态数据加密
 
----
+### 7.4 隐私
+- 符合 GDPR
+- 不出售用户数据
+- 摄像头流：绝不上传到服务器（客户端处理）
+- 用户可删除账户 + 所有数据
 
-## 9. MONETIZATION
-
-### 9.1 Pricing
-- **Free Trial**: 7 days, full access
-- **Monthly**: $9.99/month
-- **Annual**: $79.99/year (33% discount = $6.66/month)
-
-### 9.2 Free vs Paid
-
-**Free (Trial)**:
-- All MVP features
-- Limited to 7 days
-
-**Paid (Required after trial)**:
-- Unlimited access
-- New workouts every 4 weeks
-- Progress history (vs 1 week only)
-- Priority support
-
-**Future Premium Tier ($19.99/mo)**:
-- Nutrition plans
-- Advanced exercises
-- 1-on-1 PT video check-ins (async)
+### 7.5 可访问性
+- 符合 WCAG 2.1 AA
+- 支持屏幕阅读器
+- 键盘导航
+- 高对比度模式
 
 ---
 
-## 10. LAUNCH PLAN
+## 8. 设计指南
 
-### 10.1 Timeline
+### 8.1 设计原则
+1. **激励性**：庆祝每一个胜利，使用积极语言
+2. **清晰**：简单指示，无健身术语
+3. **可信赖**：专业、科学支持的指导
+4. **高效**：快速开始训练，最少点击
 
-**Month 1 (Design + Core Dev)**:
-- Week 1-2: Design mockups (Figma)
-- Week 3-4: Frontend skeleton + Backend API setup
+### 8.2 视觉风格
+- **颜色**：
+  - 主色：活力橙 (#FF6B35)
+  - 次色：深蓝 (#004E89)
+  - 成功：绿色 (#06D6A0)
+  - 警告：黄色 (#F7B32B)
+- **字体**：Poppins（标题）、Inter（正文）
+- **图像**：真实的人、多元化、充满活力、真实
 
-**Month 2 (Development)**:
-- Week 5-6: Onboarding, Workout Plan Generator, Exercise DB
-- Week 7-8: Form Check (MVP 5 exercises), Video Library
+### 8.3 关键屏幕
+1. 仪表板：今天的训练、连续计数器、进度图表
+2. 训练进行中：大号动作名称、次数计数器、形态检查叠加
+3. 完成：庆祝动画、统计数据、下次训练预览
 
-**Month 3 (Polish + Launch)**:
-- Week 9-10: Progress Tracking, Testing, Bug fixes
-- Week 11: Beta testing (50 users)
-- Week 12: Launch! 🚀
+---
 
-### 10.2 Beta Testing
-- Recruit 50 beta testers (friends, fitness communities)
-- Criteria: Fitness newbies, willingness to give feedback
-- Test for: Bugs, form check accuracy, user experience
-- Offer: Free 3-month subscription in exchange
+## 9. 商业化
 
-### 10.3 Launch Channels
+### 9.1 定价
+- **免费试用**：7 天，完全访问
+- **月费**：$9.99/月
+- **年费**：$79.99/年（33% 折扣 = $6.66/月）
+
+### 9.2 免费 vs 付费
+
+**免费（试用）**：
+- 所有 MVP 功能
+- 限 7 天
+
+**付费（试用后必须）**：
+- 无限访问
+- 每 4 周新训练
+- 进度历史（vs 仅 1 周）
+- 优先支持
+
+**未来高级层级（$19.99/月）**：
+- 营养计划
+- 高级动作
+- 1 对 1 私教视频检查（异步）
+
+---
+
+## 10. 发布计划
+
+### 10.1 时间表
+
+**第 1 个月（设计 + 核心开发）**：
+- 第 1-2 周：设计原型（Figma）
+- 第 3-4 周：前端框架 + 后端 API 设置
+
+**第 2 个月（开发）**：
+- 第 5-6 周：引导、训练计划生成器、运动数据库
+- 第 7-8 周：形态检查（MVP 5 个动作）、视频库
+
+**第 3 个月（优化 + 发布）**：
+- 第 9-10 周：进度追踪、测试、Bug 修复
+- 第 11 周：Beta 测试（50 名用户）
+- 第 12 周：发布！🚀
+
+### 10.2 Beta 测试
+- 招募 50 名 beta 测试者（朋友、健身社区）
+- 标准：健身新手、愿意提供反馈
+- 测试：Bug、形态检查准确性、用户体验
+- 奖励：免费 3 个月订阅作为交换
+
+### 10.3 发布渠道
 - Product Hunt
-- Reddit (r/fitness, r/bodyweightfitness)
-- Instagram/TikTok (demo videos)
+- Reddit（r/fitness、r/bodyweightfitness）
+- Instagram/TikTok（演示视频）
 - App Store / Google Play
-- Landing page + SEO (Google Ads)
+- 落地页 + SEO（Google Ads）
 
 ---
 
-## 11. RISKS & MITIGATION
+## 11. 风险与缓解
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Low form check accuracy | Medium | High | Validate with PTs, iterate algorithms |
-| Users injure themselves | Low | Critical | Disclaimers, form focus, PT content review |
-| Low retention (boring workouts) | Medium | High | A/B test workout styles, add variety |
-| Privacy concerns (camera) | Medium | Medium | Clear messaging, client-side processing |
-| Competition (big players) | High | Medium | Focus on niche (newbies), personalization |
-| Technical complexity delays launch | Medium | Medium | Start with simpler form checks, expand later |
-
----
-
-## 12. OPEN QUESTIONS
-
-- [ ] Should we support offline mode? (Download plans)
-- [ ] Voice coaching in MVP or later?
-- [ ] Minimum viable exercise library size? (Current: 20)
-- [ ] Integration with MyFitnessPal/Apple Health?
+| 风险 | 可能性 | 影响 | 缓解措施 |
+|------|--------|------|----------|
+| 形态检查准确率低 | 中 | 高 | 与私教验证，迭代算法 |
+| 用户受伤 | 低 | 严重 | 免责声明、专注形态、私教内容审核 |
+| 留存率低（训练无聊） | 中 | 高 | A/B 测试训练风格，增加多样性 |
+| 隐私顾虑（摄像头） | 中 | 中 | 清晰消息、客户端处理 |
+| 竞争（大型玩家） | 高 | 中 | 专注细分市场（新手）、个性化 |
+| 技术复杂性延迟发布 | 中 | 中 | 从简单形态检查开始，后续扩展 |
 
 ---
 
-## 13. APPENDIX
+## 12. 待解决问题
 
-### 13.1 Exercise List (MVP)
-
-**With Form Check** (5):
-1. Bodyweight Squat
-2. Push-up
-3. Plank
-4. Lunge (forward)
-5. Glute Bridge
-
-**Without Form Check** (10):
-6. Jumping Jacks
-7. High Knees
-8. Mountain Climbers
-9. Burpees
-10. Leg Raises
-11. Superman
-12. Side Plank
-13. Wall Sit
-14. Calf Raises
-15. Arm Circles
+- [ ] 是否支持离线模式？（下载计划）
+- [ ] 语音指导在 MVP 中还是之后？
+- [ ] 最小可行运动库大小？（当前：20）
+- [ ] 与 MyFitnessPal/Apple Health 集成？
 
 ---
 
-**Document Status**: ✅ Ready for Review
-**Next Step**: Architecture design (*architect)
+## 13. 附录
+
+### 13.1 运动列表（MVP）
+
+**有形态检查**（5 个）：
+1. 自重深蹲
+2. 俯卧撑
+3. 平板支撑
+4. 弓步蹲（向前）
+5. 臀桥
+
+**无形态检查**（10 个）：
+6. 开合跳
+7. 高抬腿
+8. 登山者
+9. 波比跳
+10. 举腿
+11. 超人式
+12. 侧平板支撑
+13. 靠墙静蹲
+14. 提踵
+15. 手臂环绕
 
 ---
 
-PM: This PRD is now complete!
+**文档状态**：✅ 准备审核
+**下一步**：架构设计（*architect）
 
-Would you like to:
-A) Review/modify any sections
-B) Proceed to Architecture (*architect)
-C) Export this document
+---
 
-Type your choice.
+PM：本 PRD 现已完成！
+
+你想要：
+A) 审核/修改任何部分
+B) 进入架构设计（*architect）
+C) 导出此文档
+
+输入你的选择。
 ```
 
 ✅ **PM 阶段完成！你现在有了完整的 PRD。**
@@ -1811,28 +1881,28 @@ Type your choice.
 
 **Architect 响应**：
 ```
-🏗️ Architecture Mode Activated
+🏗️ 架构模式已激活
 
-I've reviewed the PRD for FitAI Coach. I'll design a scalable, cost-effective architecture that supports:
+我已经审阅了 FitAI Coach 的 PRD。我将设计一个可扩展、成本效益高的架构，支持：
 
-- Real-time form checking (client-side)
-- AI workout plan generation
-- User data management
-- Video delivery
-- Payment processing
+- 实时形态检查（客户端）
+- AI 训练计划生成
+- 用户数据管理
+- 视频交付
+- 支付处理
 
-Let me start by clarifying a few technical decisions:
+让我先澄清几个技术决策：
 
-1. **Camera Processing**: Client-side (MediaPipe) vs Server-side?
-   My recommendation: Client-side (privacy + no latency)
+1. **摄像头处理**：客户端（MediaPipe）vs 服务器端？
+   我的建议：客户端（隐私 + 无延迟）
 
-2. **Video Hosting**: Self-hosted vs CDN (Cloudflare/Vimeo)?
-   My recommendation: Vimeo (easier) → Migrate to CDN later
+2. **视频托管**：自托管 vs CDN（Cloudflare/Vimeo）？
+   我的建议：Vimeo（更简单）→ 之后迁移到 CDN
 
-3. **Database**: PostgreSQL only vs + Redis cache?
-   My recommendation: PostgreSQL + Redis (performance)
+3. **数据库**：仅 PostgreSQL vs + Redis 缓存？
+   我的建议：PostgreSQL + Redis（性能）
 
-Do you approve these decisions, or want to discuss?
+你同意这些决策，还是想讨论？
 ```
 
 #### **步骤 2：确认技术决策**
@@ -1869,27 +1939,27 @@ Do you approve these decisions, or want to discuss?
 
 **Scrum Master 响应**：
 ```
-📝 Scrum Master Mode Activated
+📝 Scrum Master 模式已激活
 
-I'll break down the PRD and Architecture into development stories.
+我将把 PRD 和架构分解为开发故事。
 
-Based on the PRD, I'll create stories for:
-- Sprint 1: Project setup, Backend foundation, Database
-- Sprint 2: AI workout plan generator, Exercise DB
-- Sprint 3: Frontend - Onboarding, Dashboard
-- Sprint 4: Form Check (5 exercises)
-- Sprint 5: Progress tracking, Payment
-- Sprint 6: Testing, Polish, Launch prep
+基于 PRD，我将创建以下故事：
+- Sprint 1：项目设置、后端基础、数据库
+- Sprint 2：AI 训练计划生成器、运动数据库
+- Sprint 3：前端 - 引导、仪表板
+- Sprint 4：形态检查（5 个动作）
+- Sprint 5：进度追踪、支付
+- Sprint 6：测试、优化、发布准备
 
-Total: ~45-60 stories across 6 sprints (12 weeks)
+总计：~45-60 个故事，跨越 6 个 sprint（12 周）
 
-I'll now generate the story files in .bmad/stories/
+现在我将在 .bmad/stories/ 中生成故事文件
 
-[Generating stories...]
+[生成故事中...]
 
-✅ Generated 52 stories in .bmad/stories/
+✅ 在 .bmad/stories/ 中生成了 52 个故事
 
-Story files created:
+创建的故事文件：
 - sprint-01/story-001-project-setup.md
 - sprint-01/story-002-backend-api-foundation.md
 - sprint-01/story-003-database-setup.md
@@ -1897,14 +1967,14 @@ Story files created:
 - sprint-04/story-023-form-check-squat.md
 ...
 
-Each story contains:
-- Full context (PRD + Architecture refs)
-- Detailed implementation steps
-- Code examples
-- Acceptance criteria
-- Test cases
+每个故事包含：
+- 完整上下文（PRD + 架构引用）
+- 详细实施步骤
+- 代码示例
+- 验收标准
+- 测试用例
 
-Ready for development! Open your IDE and start with story-001.
+准备好开发了！打开你的 IDE 并从 story-001 开始。
 ```
 
 ✅ **规划阶段全部完成！**
@@ -2933,7 +3003,7 @@ sudo npx bmad-method install
 **症状**：
 ```
 你：*analyst
-Gem：I can help you with that. What would you like to know?
+Gem：我可以帮你。你想知道什么？
 （而不是进入 Analyst 模式）
 ```
 
@@ -2950,7 +3020,7 @@ Gem：I can help you with that. What would you like to know?
 **症状**：
 ```
 你：*pm
-Analyst（而不是 PM）: I'll analyze...
+Analyst（而不是 PM）：我将分析...
 ```
 
 **解决方法**：
@@ -3091,134 +3161,134 @@ ls -la .bmad/stories/
 - AI 分类能否准确？（"Amazon $50" 可能是书也可能是电子产品）
 
 Analyst：
-📋 PROJECT BRIEF - AI Personal Finance Assistant
+📋 项目简介 - AI 个人理财助手
 
-## 1. PROBLEM ANALYSIS
+## 1. 问题分析
 
-### Core Pain Points
-1. **Awareness Gap**: 60% of people don't know where their money goes
-2. **Manual Tracking Burden**: Average person gives up manual budgeting in 2 weeks
-3. **Complexity Barrier**: Traditional budgeting apps have 50+ features, overwhelming
+### 核心痛点
+1. **认知差距**：60% 的人不知道钱花在哪里
+2. **手动追踪负担**：普通人平均在 2 周内放弃手动记账
+3. **复杂性障碍**：传统记账 App 有 50+ 个功能，令人不知所措
 
-### Your Solution
-Automated financial awareness through:
-- Bank auto-sync (no manual input)
-- AI-powered transaction categorization
-- Conversational insights ("You spent $200 more on dining this month")
+### 你的解决方案
+通过以下方式实现自动化财务意识：
+- 银行自动同步（无需手动输入）
+- AI 驱动的交易分类
+- 对话式洞察（"你这个月在餐饮上多花了 $200"）
 
-## 2. COMPETITIVE LANDSCAPE
+## 2. 竞争格局
 
-| Competitor | Strength | Weakness | Your Advantage |
-|------------|----------|----------|----------------|
-| Mint | Free, established | Ads, privacy concerns, overwhelming UI | Clean AI-driven experience |
-| YNAB | Best budgeting method | $99/year, steep learning curve | Simple, affordable |
-| Copilot | Beautiful design | iOS only, $60/year | Web + Mobile |
+| 竞品 | 优势 | 劣势 | 你的优势 |
+|------|------|------|---------|
+| Mint | 免费、成熟 | 广告、隐私顾虑、UI 复杂 | 清爽的 AI 驱动体验 |
+| YNAB | 最佳记账方法 | $99/年、学习曲线陡峭 | 简单、实惠 |
+| Copilot | 精美设计 | 仅 iOS、$60/年 | Web + 移动端 |
 
-**Market Gap**: No affordable, AI-driven, simple alternative
+**市场空白**：没有实惠、AI 驱动、简单的替代品
 
-## 3. USER TRUST ANALYSIS (Critical for bank connections)
+## 3. 用户信任分析（银行连接的关键）
 
-### Security Requirements
-- SOC 2 Type II compliance
-- End-to-end encryption
-- Use Plaid (trusted aggregator, not direct bank access)
-- Clear privacy policy: "We never sell your data"
+### 安全要求
+- SOC 2 Type II 合规
+- 端到端加密
+- 使用 Plaid（可信聚合器，非直接银行访问）
+- 明确隐私政策："我们绝不出售你的数据"
 
-### Trust-Building Strategies
-- 14-day free trial (no credit card, view-only mode)
-- Show: "10,000+ users trust us" social proof
-- Bank logos: "Works with Chase, Bank of America..."
-- Explainer video: How Plaid works (you don't see bank credentials)
+### 建立信任策略
+- 14 天免费试用（无需信用卡，仅查看模式）
+- 展示："10,000+ 用户信任我们"社会证明
+- 银行 logo："支持 Chase、Bank of America..."
+- 解释视频：Plaid 如何工作（你看不到银行凭证）
 
-**Validation Needed**: Survey 50 target users:
-- "Would you connect your bank for automated tracking?" (expect 40-60% yes)
+**需要验证**：调查 50 名目标用户：
+- "你会为自动追踪连接银行吗？"（预期 40-60% 会）
 
-## 4. AI CATEGORIZATION FEASIBILITY
+## 4. AI 分类可行性
 
-### Technical Approach
+### 技术方法
 ```
-Transaction: "AMAZON.COM $52.99"
+交易："AMAZON.COM $52.99"
 ↓
-GPT-4 + Context (user history, merchant database)
+GPT-4 + 上下文（用户历史、商家数据库）
 ↓
-Categorization: "Shopping > Electronics" (85% confidence)
+分类："购物 > 电子产品"（85% 置信度）
 ↓
-If low confidence: Ask user once, learn forever
+如果置信度低：询问用户一次，永久学习
 ```
 
-**Accuracy Target**: 90%+ (validated with 10K real transactions)
+**准确度目标**：90%+（通过 1 万笔真实交易验证）
 
-**Key Innovation**: Learning loop
-- User corrects "Amazon → Books" once
-- AI remembers for future Amazon purchases
-- Personalized categorization improves over time
+**关键创新**：学习循环
+- 用户纠正一次"Amazon → 图书"
+- AI 记住未来 Amazon 购买
+- 个性化分类随时间改进
 
-## 5. MVP SCOPE (8 weeks)
+## 5. MVP 范围（8 周）
 
-### MUST HAVE
-1. ✅ Bank account connection (Plaid)
-2. ✅ AI transaction categorization (10 categories)
-3. ✅ Monthly spending overview (charts)
-4. ✅ AI insights (3 key insights per month)
-5. ✅ Manual correction (tap to recategorize)
+### 必须有
+1. ✅ 银行账户连接（Plaid）
+2. ✅ AI 交易分类（10 个类别）
+3. ✅ 月度支出概览（图表）
+4. ✅ AI 洞察（每月 3 个关键洞察）
+5. ✅ 手动纠正（点击重新分类）
 
-### SHOULD HAVE
-6. Budget setting (per category)
-7. Spending alerts ("You're over budget in Dining")
+### 应该有
+6. 预算设置（每个类别）
+7. 支出警报（"你在餐饮上超出预算"）
 
-### WON'T HAVE
-- ❌ Investment tracking
-- ❌ Bill pay
-- ❌ Credit score monitoring
+### 不会有
+- ❌ 投资追踪
+- ❌ 账单支付
+- ❌ 信用评分监控
 
-## 6. REVENUE MODEL
+## 6. 收入模型
 
-**Pricing**:
-- Free: View-only mode (1 bank account, 3 months history)
-- Premium: $5.99/month or $49/year
-  - Unlimited accounts
-  - Unlimited history
-  - AI insights
-  - Budget tools
+**定价**：
+- 免费：仅查看模式（1 个银行账户、3 个月历史）
+- 高级版：$5.99/月 或 $49/年
+  - 无限账户
+  - 无限历史
+  - AI 洞察
+  - 预算工具
 
-**Unit Economics**:
-- CAC (Customer Acquisition Cost): $15 (Google/Facebook Ads)
-- LTV (Lifetime Value): $120 (20 months avg retention × $6/mo)
-- LTV/CAC = 8 ✅ Healthy
+**单位经济**：
+- CAC（客户获取成本）：$15（Google/Facebook 广告）
+- LTV（终身价值）：$120（20 个月平均留存 × $6/月）
+- LTV/CAC = 8 ✅ 健康
 
-## 7. KEY RISKS
+## 7. 关键风险
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Low adoption (trust) | Medium | High | Free trial, security messaging |
-| Plaid costs too high | Low | Medium | $0.25/user/mo, factored into pricing |
-| AI categorization inaccurate | Medium | Medium | Human-in-loop learning, 90% target |
-| Regulatory (PSD2, data privacy) | Low | High | Legal review, SOC 2 |
+| 风险 | 概率 | 影响 | 缓解措施 |
+|------|------|------|---------|
+| 低采用率（信任） | 中 | 高 | 免费试用、安全消息传递 |
+| Plaid 成本过高 | 低 | 中 | $0.25/用户/月，已计入定价 |
+| AI 分类不准确 | 中 | 中 | 人机协同学习，90% 目标 |
+| 监管（PSD2、数据隐私） | 低 | 高 | 法律审查、SOC 2 |
 
-## 8. SUCCESS METRICS
+## 8. 成功指标
 
-**North Star**: Monthly Active Users (MAU) who sync transactions
+**北极星**：同步交易的月度活跃用户（MAU）
 
-**Key Metrics**:
-- Trial-to-paid: > 25%
-- Retention (Month 3): > 50%
-- AI categorization accuracy: > 90%
-- NPS: > 40
+**关键指标**：
+- 试用转付费：> 25%
+- 留存（第 3 个月）：> 50%
+- AI 分类准确率：> 90%
+- NPS：> 40
 
-## 9. NEXT STEPS
+## 9. 后续步骤
 
-✅ Brief complete.
+✅ 简介完成。
 
-**Recommendations**:
-1. Validate trust assumption: Survey 50 users
-2. Test AI categorization: Get sample transactions, test accuracy
-3. Prototype: Figma clickable mockup
-4. Move to *pm for detailed PRD
+**建议**：
+1. 验证信任假设：调查 50 名用户
+2. 测试 AI 分类：获取样本交易，测试准确性
+3. 原型：Figma 可点击原型
+4. 移交给 *pm 创建详细 PRD
 
-Questions for you:
-- Do you have Plaid API access or need to apply?
-- iOS/Android/Web priority?
-- Solo founder or team?
+给你的问题：
+- 你有 Plaid API 访问权限还是需要申请？
+- iOS/Android/Web 优先级？
+- 独立创始人还是团队？
 ```
 
 ---
