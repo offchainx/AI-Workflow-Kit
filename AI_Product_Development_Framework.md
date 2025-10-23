@@ -1,11 +1,12 @@
 # AI 产品开发全流程框架
 
 ## 📌 版本信息
-- **当前版本**：v1.0
+- **当前版本**：v1.1
 - **创建日期**：2025-10-23
 - **最近更新**：2025-10-23
 
 ### 更新日志
+- **v1.1** (2025-10-23)：整合 BMAD-METHOD 代理协作框架，添加 AI 模型选择策略
 - **v1.0** (2025-10-23)：初始版本，建立完整的 AI 产品开发 8 阶段框架
 
 ---
@@ -43,6 +44,11 @@
 - [ ] 竞品对比矩阵
 - [ ] 技术可行性评估
 
+**推荐工具**
+- **BMAD-METHOD Analyst 代理**：深度需求分析和市场调研
+  - 命令：`*analyst`（在 BMAD Web UI 中）
+  - 优势：结构化分析框架，人机协作迭代
+
 **常见陷阱**
 - ❌ 技术驱动而非需求驱动
 - ❌ 高估 AI 能力，低估数据难度
@@ -65,6 +71,11 @@
 - [ ] MVP 功能清单（2-3 个核心功能）
 - [ ] 用户故事地图
 - [ ] 北极星指标定义
+
+**推荐工具**
+- **BMAD-METHOD PM 代理**：生成规范级 PRD 和产品规划
+  - 命令：`*pm`（在 BMAD Web UI 中）
+  - 优势：结构化需求文档，自动生成用户故事
 
 **AI 产品特殊考虑**
 - 技术指标：模型准确率、响应时间、日成本
@@ -89,6 +100,11 @@
 - 数据库：向量数据库（Pinecone/Weaviate）+ PostgreSQL
 - 基础设施：云服务商、容器化、监控
 
+**开发方法论选择**
+- **传统敏捷开发**：适合小团队、简单项目
+- **BMAD-METHOD（推荐）**：代理化敏捷开发，适合 AI 产品
+  - 优势：专业化 AI 代理团队、上下文持久化、规范级文档
+
 **典型架构层次**
 ```
 用户界面层
@@ -107,6 +123,11 @@ AI 服务层（模型调用、向量检索、缓存）
 - [ ] 系统架构图
 - [ ] API 设计文档
 - [ ] 成本预算模型
+
+**推荐工具**
+- **BMAD-METHOD Architect 代理**：完整系统架构设计
+  - 命令：`*architect`（在 BMAD Web UI 中）
+  - 优势：专业架构分析、技术栈推荐、详细设计文档
 
 ---
 
@@ -182,6 +203,13 @@ AI 服务层（模型调用、向量检索、缓存）
 - [ ] 测试报告
 - [ ] 技术债务清单
 - [ ] 性能基准数据
+
+**推荐工具**
+- **BMAD-METHOD 开发团队**：Scrum Master + Dev + QA 代理
+  - Scrum Master：将 PRD/架构分解为开发故事（`.bmad/stories/`）
+  - Dev 代理：读取故事文件（包含完整上下文）执行开发
+  - QA 代理：自动化质量验证
+  - 与 Claude Code 协同：Claude Code 作为执行引擎实现代码
 
 ---
 
@@ -319,6 +347,13 @@ AI 服务层（模型调用、向量检索、缓存）
 - **提示词管理**：PromptLayer
 - **调试监控**：LangSmith
 
+### AI 代理协作（推荐 ⭐）
+- **BMAD-METHOD**：代理化敏捷开发框架
+  - GitHub: https://github.com/bmad-code-org/BMAD-METHOD
+  - Stars: 19.4k
+  - 用途：规划、架构、开发全流程 AI 代理协作
+  - 快速开始：`npx bmad-method install`
+
 ### 监控分析
 - **错误追踪**：Sentry
 - **用户分析**：Mixpanel / Amplitude
@@ -369,14 +404,173 @@ AI 服务层（模型调用、向量检索、缓存）
 
 ---
 
+---
+
+## 🤖 BMAD-METHOD 集成指南
+
+### 什么是 BMAD-METHOD？
+
+**BMAD-METHOD™** 是一个通用 AI 代理协作框架，实现"代理化敏捷驱动开发"（Agentic Agile Driven Development）。
+
+**核心特点**：
+- ⭐ 19.4k GitHub Stars
+- 🔓 开源（MIT License）
+- 🏆 解决 AI 辅助开发的两大痛点：规划不一致 + 上下文丢失
+
+### 核心方法论
+
+#### **阶段 1：代理规划（Agentic Planning）**
+专业化 AI 代理团队 + 人机协作
+- 🔍 **Analyst 代理**：需求分析和市场调研
+- 📋 **PM 代理**：产品管理和 PRD 生成
+- 🏗️ **Architect 代理**：系统架构设计
+
+**产出**：规范级 PRD + 详细架构文档
+
+#### **阶段 2：上下文工程开发**
+上下文驱动的代码实现
+- 📝 **Scrum Master 代理**：分解为超详细开发故事
+- 💻 **Dev 代理**：读取故事文件（嵌入完整上下文）执行开发
+- ✅ **QA 代理**：自动化质量验证
+
+**创新**：通过故事文件实现异步协作和知识持久化
+
+### 快速开始
+
+#### **安装（1 条命令）**
+```bash
+npx bmad-method install
+```
+
+**系统要求**：Node.js v20+
+
+#### **Web UI 快速路径（2 分钟）**
+1. 下载团队包：`team-fullstack.txt`
+2. 创建 Gemini Gem 或 CustomGPT
+3. 上传团队包，开始规划
+
+### 核心命令
+
+| 命令 | 代理 | 用途 | 对应阶段 |
+|------|------|------|----------|
+| `*analyst` | Analyst | 需求分析 | 阶段 0 |
+| `*pm` | PM | PRD 生成 | 阶段 1 |
+| `*architect` | Architect | 架构设计 | 阶段 2 |
+| `*scrum` | Scrum Master | 创建开发故事 | 阶段 5 |
+| `*help` | - | 查看命令 | 任何时候 |
+
+### 与 Claude Code 协同工作流
+
+**黄金组合**：
+```
+BMAD-METHOD（规划层）
+    ↓
+生成 PRD + 架构 + 开发故事
+    ↓
+Claude Code（执行层）
+    ↓
+读取故事 → 实现代码 → 运行测试
+```
+
+**实际操作**：
+```
+# 1. 规划阶段（BMAD Web UI）
+*analyst → 需求分析
+*pm → PRD 生成
+*architect → 架构设计
+*scrum → 生成开发故事
+
+# 2. 开发阶段（Claude Code）
+在 Claude Code 中：
+"请根据 .bmad/stories/story-001.md 实现用户认证功能"
+
+Claude Code 自动：
+- 读取故事文件（包含完整上下文）
+- 理解架构设计
+- 实现功能
+- 运行测试
+```
+
+### 使用场景示例
+
+#### **场景：开发 AI 聊天机器人**
+
+**第 1 步：想法验证（BMAD Analyst）**
+```
+你：我想做一个教育行业的 AI 辅导机器人
+*analyst
+
+Analyst：
+- 目标用户：K-12 学生和教师
+- 核心痛点：个性化学习、即时答疑
+- 技术可行性：RAG + GPT-4
+```
+
+**第 2 步：需求定义（BMAD PM）**
+```
+*pm
+
+PM：生成 PRD
+- Must Have: 智能答疑、学习追踪
+- Should Have: 个性化推荐
+- 北极星指标：学生日活 + 问题解决率
+```
+
+**第 3 步：架构设计（BMAD Architect）**
+```
+*architect
+
+Architect：
+- 前端：React + WebSocket
+- 后端：Python FastAPI
+- AI: GPT-4 + RAG (Pinecone)
+- 数据库：PostgreSQL + Redis
+```
+
+**第 4 步：开发执行（BMAD + Claude Code）**
+```
+*scrum  # 生成开发故事
+
+然后在 Claude Code 中：
+"请按照 .bmad/stories/ 中的故事顺序实现功能"
+```
+
+### 最佳实践
+
+1. **规划阶段使用深度模型**
+   - 推荐：Claude Opus 或 GPT-4
+   - 原因：规划需要顶级推理能力
+
+2. **开发阶段使用高效模型**
+   - 推荐：Claude Sonnet 或 Haiku
+   - 原因：平衡性能和成本
+
+3. **保持更新**
+   ```bash
+   npx bmad-method install  # 定期运行
+   ```
+
+4. **理解工作流图**
+   - 查看 BMAD GitHub README 中的工作流图
+   - 理解 PRD + 架构如何创建
+   - 理解代理如何通过故事文件协作
+
+### 社区资源
+
+- 📖 [GitHub Repository](https://github.com/bmad-code-org/BMAD-METHOD)
+- 💬 Discord 社区
+- 📺 YouTube 教程
+
+---
+
 ## 📝 下次讨论时更新
 
 本文档会根据深入讨论持续优化，重点关注：
+- [x] BMAD-METHOD 集成指南
 - [ ] 具体 AI 创业想法的定制化流程
 - [ ] 特定阶段的深度展开
 - [ ] 实际案例补充
 - [ ] 模板文件添加
-- [ ] 工具选型详细对比
 
 ---
 
