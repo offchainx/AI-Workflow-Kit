@@ -1,0 +1,305 @@
+{
+  "name": "AI智能邮件自动回复",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "isUnread": true,
+          "labelIds": [
+            "INBOX"
+          ]
+        },
+        "options": {}
+      },
+      "name": "Gmail触发器",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 提取邮件信息\nconst payload = $input.item.json.payload;\nconst headers = payload.headers;\n\n// 获取发件人、主题、正文\nconst from = headers.find(h => h.name === 'From')?.value || '';\nconst subject = headers.find(h => h.name === 'Subject')?.value || '';\nconst date = headers.find(h => h.name === 'Date')?.value || '';\n\n// 解析正文（支持HTML和纯文本）\nlet body = '';\nif (payload.parts) {\n  const textPart = payload.parts.find(p => p.mimeType === 'text/plain');\n  if (textPart && textPart.body.data) {\n    body = Buffer.from(textPart.body.data, 'base64').toString('utf-8');\n  }\n} else if (payload.body.data) {\n  body = Buffer.from(payload.body.data, 'base64').toString('utf-8');\n}\n\nreturn {\n  json: {\n    messageId: $input.item.json.id,\n    threadId: $input.item.json.threadId,\n    from: from,\n    subject: subject,\n    body: body,\n    date: date,\n    snippet: $input.item.json.snippet\n  }\n};"
+      },
+      "name": "解析邮件内容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 邮件分类逻辑\nconst subject = $input.item.json.subject.toLowerCase();\nconst body = $input.item.json.body.toLowerCase();\nconst from = $input.item.json.from.toLowerCase();\n\n// 定义规则\nconst rules = [\n  {\n    category: 'urgent',\n    keywords: ['urgent', '紧急', 'asap', 'important', '重要'],\n    shouldAutoReply: false\n  },\n  {\n    category: 'sales',\n    keywords: ['offer', 'discount', 'sale', '优惠', '促销'],\n    shouldAutoReply: true,\n    replyTemplate: 'sales'\n  },\n  {\n    category: 'support',\n    keywords: ['help', 'issue', 'problem', '帮助', '问题', 'bug'],\n    shouldAutoReply: true,\n    replyTemplate: 'support'\n  },\n  {\n    category: 'meeting',\n    keywords: ['meeting', 'schedule', 'calendar', '会议', '日程'],\n    shouldAutoReply: true,\n    replyTemplate: 'meeting'\n  },\n  {\n    category: 'newsletter',\n    keywords: ['newsletter', 'unsubscribe', '订阅', '退订'],\n    shouldAutoReply: false\n  }\n];\n\nlet category = 'general';\nlet shouldAutoReply = true;\nlet replyTemplate = 'general';\n\nfor (const rule of rules) {\n  const hasKeyword = rule.keywords.some(keyword => \n    subject.includes(keyword) || body.includes(keyword)\n  );\n  \n  if (hasKeyword) {\n    category = rule.category;\n    shouldAutoReply = rule.shouldAutoReply;\n    replyTemplate = rule.replyTemplate || 'general';\n    break;\n  }\n}\n\nreturn {\n  json: {\n    ...$input.item.json,\n    category: category,\n    shouldAutoReply: shouldAutoReply,\n    replyTemplate: replyTemplate\n  }\n};"
+      },
+      "name": "智能分类",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.shouldAutoReply }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "是否自动回复",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"你是一个专业的邮件助手。根据以下邮件内容生成礼貌、专业的回复。类别: \" + $json.category}, {\\\"role\\\": \\\"user\\\", \\\"content\\\": \\\"发件人: \" + $json.from + \\\"\\\\n主题: \" + $json.subject + \\\"\\\\n正文: \" + $json.body + \\\"\\\\n\\\\n请生成一封简洁、专业的回复邮件。\\\"}] }}"
+            },
+            {
+              "name": "temperature",
+              "value": 0.7
+            }
+          ]
+        }
+      },
+      "name": "AI生成回复",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiReply = $input.item.json.choices[0].message.content;\nconst originalEmail = $node[\"智能分类\"].json;\n\nreturn {\n  json: {\n    ...originalEmail,\n    replyContent: aiReply\n  }\n};"
+      },
+      "name": "准备回复内容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.from }}",
+        "subject": "=Re: {{ $json.subject }}",
+        "message": "={{ $json.replyContent }}",
+        "options": {
+          "replyToThread": "={{ $json.threadId }}"
+        }
+      },
+      "name": "发送Gmail回复",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1450, 200],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabel",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": [
+          "Label_1"
+        ]
+      },
+      "name": "标记为已处理",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1650, 200],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=📧 邮件已自动回复\n\n发件人: {{ $json.from }}\n主题: {{ $json.subject }}\n类别: {{ $json.category }}\n\n回复内容:\n{{ $json.replyContent }}",
+        "additionalFields": {}
+      },
+      "name": "通知管理员",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1050, 400],
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "email_log",
+        "columns": "message_id,from_email,subject,category,auto_replied,created_at",
+        "additionalFields": {}
+      },
+      "name": "记录处理日志",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1250, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail触发器": {
+      "main": [
+        [
+          {
+            "node": "解析邮件内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析邮件内容": {
+      "main": [
+        [
+          {
+            "node": "智能分类",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "智能分类": {
+      "main": [
+        [
+          {
+            "node": "是否自动回复",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否自动回复": {
+      "main": [
+        [
+          {
+            "node": "AI生成回复",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "通知管理员",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI生成回复": {
+      "main": [
+        [
+          {
+            "node": "准备回复内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "准备回复内容": {
+      "main": [
+        [
+          {
+            "node": "发送Gmail回复",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "发送Gmail回复": {
+      "main": [
+        [
+          {
+            "node": "标记为已处理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "标记为已处理": {
+      "main": [
+        [
+          {
+            "node": "记录处理日志",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "通知管理员": {
+      "main": [
+        [
+          {
+            "node": "记录处理日志",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "4",
+      "name": "邮件自动化"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-24T00:00:00.000Z",
+  "versionId": "1"
+}

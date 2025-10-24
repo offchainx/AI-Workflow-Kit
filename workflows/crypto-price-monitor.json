@@ -1,0 +1,198 @@
+{
+  "name": "加密货币价格监控与交易信号",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "name": "每分钟触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT",
+        "options": {}
+      },
+      "name": "获取BTC价格",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=20",
+        "options": {}
+      },
+      "name": "获取历史K线",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 450]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 计算技术指标\nconst currentPrice = parseFloat($node[\"获取BTC价格\"].json.price);\nconst klines = $node[\"获取历史K线\"].json;\n\n// 提取收盘价\nconst closePrices = klines.map(k => parseFloat(k[4]));\n\n// 计算SMA (简单移动平均)\nconst sma = closePrices.reduce((sum, price) => sum + price, 0) / closePrices.length;\n\n// 计算RSI (相对强弱指标)\nfunction calculateRSI(prices, period = 14) {\n  let gains = 0;\n  let losses = 0;\n  \n  for (let i = 1; i < prices.length; i++) {\n    const change = prices[i] - prices[i-1];\n    if (change > 0) {\n      gains += change;\n    } else {\n      losses -= change;\n    }\n  }\n  \n  const avgGain = gains / period;\n  const avgLoss = losses / period;\n  const rs = avgGain / avgLoss;\n  const rsi = 100 - (100 / (1 + rs));\n  \n  return rsi;\n}\n\nconst rsi = calculateRSI(closePrices);\n\n// 计算MACD\nfunction calculateEMA(prices, period) {\n  const k = 2 / (period + 1);\n  let ema = prices[0];\n  \n  for (let i = 1; i < prices.length; i++) {\n    ema = prices[i] * k + ema * (1 - k);\n  }\n  \n  return ema;\n}\n\nconst ema12 = calculateEMA(closePrices, 12);\nconst ema26 = calculateEMA(closePrices, 26);\nconst macd = ema12 - ema26;\n\n// 生成交易信号\nlet signal = 'HOLD';\nlet reason = '';\n\nif (rsi < 30 && currentPrice < sma * 0.98) {\n  signal = 'BUY';\n  reason = 'RSI超卖 + 价格低于SMA 2%';\n} else if (rsi > 70 && currentPrice > sma * 1.02) {\n  signal = 'SELL';\n  reason = 'RSI超买 + 价格高于SMA 2%';\n} else if (macd > 0 && rsi > 50 && rsi < 70) {\n  signal = 'BUY';\n  reason = 'MACD金叉 + RSI中性偏强';\n} else if (macd < 0 && rsi < 50 && rsi > 30) {\n  signal = 'SELL';\n  reason = 'MACD死叉 + RSI中性偏弱';\n}\n\nreturn {\n  json: {\n    symbol: 'BTCUSDT',\n    currentPrice: currentPrice,\n    sma: sma,\n    rsi: rsi.toFixed(2),\n    macd: macd.toFixed(2),\n    signal: signal,\n    reason: reason,\n    timestamp: new Date().toISOString(),\n    priceChange24h: ((currentPrice - closePrices[0]) / closePrices[0] * 100).toFixed(2)\n  }\n};"
+      },
+      "name": "计算技术指标",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 375]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.signal }}",
+              "operation": "notEqual",
+              "value2": "HOLD"
+            }
+          ]
+        }
+      },
+      "name": "是否有交易信号",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 375]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=🚨 交易信号警报\n\n币种: {{ $json.symbol }}\n信号: {{ $json.signal }}\n原因: {{ $json.reason }}\n\n当前价格: ${{ $json.currentPrice }}\n24h变化: {{ $json.priceChange24h }}%\nRSI: {{ $json.rsi }}\nMACD: {{ $json.macd }}\nSMA(20): ${{ $json.sma.toFixed(2) }}\n\n时间: {{ $json.timestamp }}",
+        "additionalFields": {}
+      },
+      "name": "发送Telegram警报",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "trading_signals",
+        "columns": "symbol,price,signal,reason,rsi,macd,sma,created_at",
+        "additionalFields": {}
+      },
+      "name": "记录到数据库",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1050, 450],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "name": "无信号，跳过",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1050, 550]
+    }
+  ],
+  "connections": {
+    "每分钟触发": {
+      "main": [
+        [
+          {
+            "node": "获取BTC价格",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "获取历史K线",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取BTC价格": {
+      "main": [
+        [
+          {
+            "node": "计算技术指标",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取历史K线": {
+      "main": [
+        [
+          {
+            "node": "计算技术指标",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "计算技术指标": {
+      "main": [
+        [
+          {
+            "node": "是否有交易信号",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否有交易信号": {
+      "main": [
+        [
+          {
+            "node": "发送Telegram警报",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "记录到数据库",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "无信号，跳过",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "2",
+      "name": "量化交易"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-24T00:00:00.000Z",
+  "versionId": "1"
+}

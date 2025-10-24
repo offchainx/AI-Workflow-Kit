@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//{{PROJECT_PATH}}/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Read(//{{PARENT_PATH}}/.claude/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

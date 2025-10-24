@@ -1,0 +1,389 @@
+{
+  "name": "AI内容多平台自动发布",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "publish-content",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook接收内容",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "auto-publish-content"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 提取并验证输入数据\nconst body = $input.item.json.body;\n\nif (!body.content) {\n  throw new Error('缺少content字段');\n}\n\nreturn {\n  json: {\n    originalContent: body.content,\n    title: body.title || '无标题',\n    tags: body.tags || [],\n    images: body.images || [],\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "验证输入",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"你是一个专业的内容改写专家，擅长将内容改写成适合Twitter的风格。\\\"}, {\\\"role\\\": \\\"user\\\", \\\"content\\\": \\\"将以下内容改写成Twitter thread格式（每条推文最多280字符）：\\\\n\\\\n\" + $json.originalContent + \"\\\\n\\\\n返回JSON数组格式: [{\\\\\\\"text\\\\\\\": \\\\\\\"...\\\\\\\"}]\\\"}] }}"
+            }
+          ]
+        }
+      },
+      "name": "AI改写-Twitter版",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"你是LinkedIn内容专家，擅长专业、有深度的职业内容。\\\"}, {\\\"role\\\": \\\"user\\\", \\\"content\\\": \\\"将以下内容改写成LinkedIn帖子（专业、有洞察）：\\\\n\\\\n\" + $json.originalContent + \"\\\\n\\\\n返回纯文本，不要JSON格式。\\\"}] }}"
+            }
+          ]
+        }
+      },
+      "name": "AI改写-LinkedIn版",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"你是小红书爆款内容创作者，风格轻松、多emoji。\\\"}, {\\\"role\\\": \\\"user\\\", \\\"content\\\": \\\"将以下内容改写成小红书风格（轻松、emoji丰富、接地气）：\\\\n\\\\n\" + $json.originalContent + \"\\\\n\\\\n返回纯文本，不要JSON格式。\\\"}] }}"
+            }
+          ]
+        }
+      },
+      "name": "AI改写-小红书版",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 400],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const tweets = JSON.parse($input.item.json.choices[0].message.content);\n\nreturn {\n  json: {\n    platform: 'twitter',\n    content: tweets,\n    status: 'ready'\n  }\n};"
+      },
+      "name": "处理Twitter内容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const linkedinContent = $input.item.json.choices[0].message.content;\n\nreturn {\n  json: {\n    platform: 'linkedin',\n    content: linkedinContent,\n    status: 'ready'\n  }\n};"
+      },
+      "name": "处理LinkedIn内容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const xiaohongshuContent = $input.item.json.choices[0].message.content;\n\nreturn {\n  json: {\n    platform: 'xiaohongshu',\n    content: xiaohongshuContent,\n    status: 'ready'\n  }\n};"
+      },
+      "name": "处理小红书内容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.content[0].text }}",
+        "additionalFields": {}
+      },
+      "name": "发布到Twitter",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [1050, 200],
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "5",
+          "name": "Twitter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "share",
+        "text": "={{ $json.content }}",
+        "additionalFields": {}
+      },
+      "name": "发布到LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "6",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_XIAOHONGSHU_API_ENDPOINT",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.content }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $node[\\\"验证输入\\\"].json.title }}"
+            }
+          ]
+        }
+      },
+      "name": "发布到小红书",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "published_content",
+        "columns": "original_content,platform,published_content,status,created_at",
+        "additionalFields": {}
+      },
+      "name": "记录发布历史",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\\\"success\\\": true, \\\"message\\\": \\\"内容已发布到所有平台\\\", \\\"platforms\\\": [\\\"Twitter\\\", \\\"LinkedIn\\\", \\\"小红书\\\"], \\\"timestamp\\\": $json.timestamp} }}",
+        "options": {}
+      },
+      "name": "返回成功响应",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook接收内容": {
+      "main": [
+        [
+          {
+            "node": "验证输入",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "验证输入": {
+      "main": [
+        [
+          {
+            "node": "AI改写-Twitter版",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI改写-LinkedIn版",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI改写-小红书版",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI改写-Twitter版": {
+      "main": [
+        [
+          {
+            "node": "处理Twitter内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI改写-LinkedIn版": {
+      "main": [
+        [
+          {
+            "node": "处理LinkedIn内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI改写-小红书版": {
+      "main": [
+        [
+          {
+            "node": "处理小红书内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "处理Twitter内容": {
+      "main": [
+        [
+          {
+            "node": "发布到Twitter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "处理LinkedIn内容": {
+      "main": [
+        [
+          {
+            "node": "发布到LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "处理小红书内容": {
+      "main": [
+        [
+          {
+            "node": "发布到小红书",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "发布到Twitter": {
+      "main": [
+        [
+          {
+            "node": "记录发布历史",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "发布到LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "记录发布历史",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "发布到小红书": {
+      "main": [
+        [
+          {
+            "node": "记录发布历史",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "记录发布历史": {
+      "main": [
+        [
+          {
+            "node": "返回成功响应",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "3",
+      "name": "内容营销"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-24T00:00:00.000Z",
+  "versionId": "1"
+}

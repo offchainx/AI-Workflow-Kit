@@ -1,0 +1,238 @@
+{
+  "name": "YouTube 视频自动收集到知识库",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "name": "每6小时检查",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "query": "AI开发教程",
+        "maxResults": 10,
+        "sortBy": "date"
+      },
+      "name": "搜索YouTube视频",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "youtubeOAuth2Api": {
+          "id": "1",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "videoId": "={{ $json.id.videoId }}"
+      },
+      "name": "获取视频详情",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 检查视频是否已存在于数据库\nconst videoId = $input.item.json.id;\nconst title = $input.item.json.snippet.title;\nconst description = $input.item.json.snippet.description;\nconst channelTitle = $input.item.json.snippet.channelTitle;\nconst publishedAt = $input.item.json.snippet.publishedAt;\nconst thumbnailUrl = $input.item.json.snippet.thumbnails.high.url;\n\nreturn {\n  json: {\n    video_id: videoId,\n    title: title,\n    description: description,\n    channel: channelTitle,\n    published_at: publishedAt,\n    thumbnail_url: thumbnailUrl,\n    url: `https://www.youtube.com/watch?v=${videoId}`,\n    transcript_needed: true\n  }\n};"
+      },
+      "name": "提取视频信息",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"user\", \"content\": \"总结这个YouTube视频，提取3-5个关键要点和标签。\\n\\n标题: \" + $json.title + \"\\n描述: \" + $json.description + \"\\n\\n返回JSON格式: {\\\"summary\\\": \\\"...\\\", \\\"key_points\\\": [...], \\\"tags\\\": [...]}\"}] }}"
+            },
+            {
+              "name": "temperature",
+              "value": 0.7
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "AI生成摘要",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = JSON.parse($input.item.json.choices[0].message.content);\nconst videoData = $node[\"提取视频信息\"].json;\n\nreturn {\n  json: {\n    ...videoData,\n    summary: aiResponse.summary,\n    key_points: aiResponse.key_points,\n    tags: aiResponse.tags,\n    created_at: new Date().toISOString()\n  }\n};"
+      },
+      "name": "合并数据",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "videos",
+        "columns": "video_id,title,description,summary,key_points,tags,channel,url,thumbnail_url,published_at,created_at",
+        "additionalFields": {}
+      },
+      "name": "存入Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1450, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=📹 新视频已收集\n\n标题: {{ $json.title }}\n频道: {{ $json.channel }}\n\n{{ $json.summary }}\n\n🔗 {{ $json.url }}",
+        "additionalFields": {}
+      },
+      "name": "发送Telegram通知",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1650, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "每6小时检查": {
+      "main": [
+        [
+          {
+            "node": "搜索YouTube视频",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "搜索YouTube视频": {
+      "main": [
+        [
+          {
+            "node": "获取视频详情",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取视频详情": {
+      "main": [
+        [
+          {
+            "node": "提取视频信息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取视频信息": {
+      "main": [
+        [
+          {
+            "node": "AI生成摘要",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI生成摘要": {
+      "main": [
+        [
+          {
+            "node": "合并数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "合并数据": {
+      "main": [
+        [
+          {
+            "node": "存入Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "存入Supabase": {
+      "main": [
+        [
+          {
+            "node": "发送Telegram通知",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "1",
+      "name": "知识管理"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-24T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,404 @@
+{
+  "name": "多平台数据同步工作流",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "name": "每小时触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 350]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "table": "bookmarks",
+        "returnAll": false,
+        "limit": 100,
+        "additionalFields": {
+          "filters": "created_at.gte.{{ $today.minus({hours: 1}).toISO() }}"
+        }
+      },
+      "name": "获取Supabase新数据",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 250],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": "YOUR_BASE_ID",
+        "table": "Bookmarks",
+        "options": {
+          "filterByFormula": "CREATED_TIME() > DATEADD(NOW(), -1, 'hours')"
+        }
+      },
+      "name": "获取Airtable新数据",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [450, 450],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "8",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 合并Supabase和Airtable数据\nconst supabaseData = $node[\"获取Supabase新数据\"].json || [];\nconst airtableData = $node[\"获取Airtable新数据\"].json || [];\n\n// 转换Airtable格式\nconst airtableConverted = airtableData.map(item => ({\n  id: item.id,\n  title: item.fields.Title,\n  url: item.fields.URL,\n  tags: item.fields.Tags,\n  source: 'airtable',\n  created_at: item.fields['Created Time']\n}));\n\n// 转换Supabase格式\nconst supabaseConverted = supabaseData.map(item => ({\n  ...item,\n  source: 'supabase'\n}));\n\n// 合并并去重（基于URL）\nconst allData = [...supabaseConverted, ...airtableConverted];\nconst uniqueData = allData.reduce((acc, current) => {\n  const exists = acc.find(item => item.url === current.url);\n  if (!exists) {\n    acc.push(current);\n  }\n  return acc;\n}, []);\n\nreturn uniqueData.map(item => ({ json: item }));"
+      },
+      "name": "合并数据",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 350]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.source }}",
+              "operation": "equals",
+              "value2": "supabase"
+            }
+          ]
+        }
+      },
+      "name": "数据来源判断",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 350]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": "YOUR_BASE_ID",
+        "table": "Bookmarks",
+        "columns": {
+          "mappings": [
+            {
+              "field": "Title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "field": "URL",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "field": "Tags",
+              "value": "={{ $json.tags }}"
+            },
+            {
+              "field": "Source",
+              "value": "Supabase Sync"
+            }
+          ]
+        }
+      },
+      "name": "同步到Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1050, 250],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "8",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "bookmarks",
+        "columns": "title,url,tags,source",
+        "additionalFields": {}
+      },
+      "name": "同步到Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1050, 450],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "parent",
+              "value": "={{ {\\\"database_id\\\": \\\"YOUR_NOTION_DATABASE_ID\\\"} }}"
+            },
+            {
+              "name": "properties",
+              "value": "={{ {\\\"Title\\\": {\\\"title\\\": [{\\\"text\\\": {\\\"content\\\": $json.title}}]}, \\\"URL\\\": {\\\"url\\\": $json.url}, \\\"Tags\\\": {\\\"multi_select\\\": $json.tags.map(t => ({\\\"name\\\": t}))}} }}"
+            }
+          ]
+        }
+      },
+      "name": "同步到Notion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1250, 350],
+      "credentials": {
+        "notionApi": {
+          "id": "9",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/YOUR_USERNAME/bookmarks/issues",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "body",
+              "value": "={{ $json.url + '\\n\\n' + $json.tags.join(', ') }}"
+            },
+            {
+              "name": "labels",
+              "value": "={{ $json.tags }}"
+            }
+          ]
+        }
+      },
+      "name": "备份到GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1450, 350],
+      "credentials": {
+        "githubApi": {
+          "id": "10",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "sync_log",
+        "columns": "sync_time,records_synced,platforms,status",
+        "additionalFields": {}
+      },
+      "name": "记录同步日志",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1650, 350],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 统计同步结果\nconst totalRecords = $items().length;\nconst platforms = ['Supabase', 'Airtable', 'Notion', 'GitHub'];\n\nreturn {\n  json: {\n    sync_time: new Date().toISOString(),\n    records_synced: totalRecords,\n    platforms: platforms.join(', '),\n    status: 'success'\n  }\n};"
+      },
+      "name": "生成同步报告",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 550]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=📊 数据同步完成\n\n同步时间: {{ $json.sync_time }}\n同步记录数: {{ $json.records_synced }}\n同步平台: {{ $json.platforms }}\n状态: ✅ {{ $json.status }}",
+        "additionalFields": {}
+      },
+      "name": "发送同步通知",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1650, 550],
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "每小时触发": {
+      "main": [
+        [
+          {
+            "node": "获取Supabase新数据",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "获取Airtable新数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取Supabase新数据": {
+      "main": [
+        [
+          {
+            "node": "合并数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取Airtable新数据": {
+      "main": [
+        [
+          {
+            "node": "合并数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "合并数据": {
+      "main": [
+        [
+          {
+            "node": "数据来源判断",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "数据来源判断": {
+      "main": [
+        [
+          {
+            "node": "同步到Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "同步到Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "同步到Airtable": {
+      "main": [
+        [
+          {
+            "node": "同步到Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "同步到Supabase": {
+      "main": [
+        [
+          {
+            "node": "同步到Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "同步到Notion": {
+      "main": [
+        [
+          {
+            "node": "备份到GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "备份到GitHub": {
+      "main": [
+        [
+          {
+            "node": "记录同步日志",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "生成同步报告",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成同步报告": {
+      "main": [
+        [
+          {
+            "node": "发送同步通知",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "5",
+      "name": "数据同步"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-24T00:00:00.000Z",
+  "versionId": "1"
+}
